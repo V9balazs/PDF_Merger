@@ -41,8 +41,13 @@ def display_merger():
                 except:
                     messagebox.showerror("Error", f"Error merging file: {filepath}")
 
+        # Ellenőrizzük, hogy a fájlnév végződik-e .pdf-re
+        merged_file_name = file_name_entry.get()
+        if not merged_file_name.lower().endswith('.pdf'):
+            merged_file_name += '.pdf'
+
         # Itt definiáljuk az output_path változót
-        output_path = os.path.join(save_location_entry.get(), file_name_entry.get())
+        output_path = os.path.join(save_location_entry.get(), merged_file_name)
 
         try:
             with open(output_path, 'wb') as output_file:
@@ -79,7 +84,7 @@ def load_data():
 
 def display_settings():
     global save_location_entry, file_name_entry
-    
+
     # Törli a settings_frame aktuális tartalmát
     for widget in settings_frame.winfo_children():
         widget.destroy()
