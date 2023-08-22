@@ -14,7 +14,13 @@ def select_pdf():
     if filepath:
         print(filepath)
 
+# Globális változók definiálása
+save_location_entry = None
+file_name_entry = None
+
 def display_merger():
+    global entries
+    global save_location_entry, file_name_entry
     # Törli a merger_frame aktuális tartalmát
     for widget in merger_frame.winfo_children():
         widget.destroy()
@@ -26,7 +32,7 @@ def display_merger():
 
     def merge_files():
         merger = PyPDF2.PdfMerger()
-    
+
         for entry in entries:
             filepath = entry.get()
             if filepath.endswith('.pdf'):
@@ -35,9 +41,8 @@ def display_merger():
                 except:
                     messagebox.showerror("Error", f"Error merging file: {filepath}")
 
-        save_directory = save_dir_entry_var.get()
-        save_filename = save_filename_entry_var.get()
-        output_path = os.path.join(save_directory, save_filename)
+        # Itt definiáljuk az output_path változót
+        output_path = os.path.join(save_location_entry.get(), file_name_entry.get())
 
         try:
             with open(output_path, 'wb') as output_file:
@@ -73,17 +78,22 @@ def load_data():
     return None, None
 
 def display_settings():
+    global save_location_entry, file_name_entry
+    
     # Törli a settings_frame aktuális tartalmát
     for widget in settings_frame.winfo_children():
         widget.destroy()
+
+    # Változók definiálása a display_settings függvényen belül
+    save_dir_entry_var = tk.StringVar()
+    save_filename_entry_var = tk.StringVar()
 
     # Címke a fájlnévhez
     file_name_label = tk.Label(settings_frame, text="Merged File Name:")
     file_name_label.grid(row=0, column=0, sticky='w', padx=10, pady=10)
 
     # Entry a fájlnévhez
-    file_name_var = tk.StringVar()
-    file_name_entry = tk.Entry(settings_frame, textvariable=file_name_var, width=50)
+    file_name_entry = tk.Entry(settings_frame, textvariable=save_filename_entry_var, width=50)
     file_name_entry.grid(row=0, column=1, padx=10, pady=10)
     
     # Címke a mentési helyhez
@@ -91,15 +101,14 @@ def display_settings():
     save_location_label.grid(row=1, column=0, sticky='w', padx=10, pady=10)
 
     # Entry a mentési helyhez
-    save_location_var = tk.StringVar()
-    save_location_entry = tk.Entry(settings_frame, textvariable=save_location_var, width=50)
+    save_location_entry = tk.Entry(settings_frame, textvariable=save_dir_entry_var, width=50)
     save_location_entry.grid(row=1, column=1, padx=10, pady=10)
 
     # Gomb a mappa választáshoz
     def choose_folder():
         folder = filedialog.askdirectory()
         if folder:
-            save_location_var.set(folder)
+            save_dir_entry_var.set(folder)
 
     choose_folder_btn = tk.Button(settings_frame, text="Choose Folder", command=choose_folder)
     choose_folder_btn.grid(row=1, column=2, padx=10, pady=10)
@@ -107,16 +116,41 @@ def display_settings():
     # Adatok betöltése
     saved_file_name, saved_location = load_data()
     if saved_file_name:
-        file_name_var.set(saved_file_name)
+        save_filename_entry_var.set(saved_file_name)
     if saved_location:
-        save_location_var.set(saved_location)
+        save_dir_entry_var.set(saved_location)
 
     # Adatok automatikus mentése
     def auto_save(*args):
-        save_data(file_name_var.get(), save_location_var.get())
+        save_data(save_filename_entry_var.get(), save_dir_entry_var.get())
 
-    file_name_var.trace_add("write", auto_save)
-    save_location_var.trace_add("write", auto_save)
+    save_filename_entry_var.trace_add("write", auto_save)
+    save_dir_entry_var.trace_add("write", auto_save)
+
+    # Itt ágyazzuk be a merge_files függvényt
+    def merge_files():
+        merger = PyPDF2.PdfMerger()
+
+        for entry in entries:
+            filepath = entry.get()
+            if filepath.endswith('.pdf'):
+                try:
+                    merger.append(filepath)
+                except:
+                    messagebox.showerror("Error", f"Error merging file: {filepath}")
+
+        # Itt definiáljuk az output_path változót
+        output_path = os.path.join(save_location_entry.get(), file_name_entry.get())
+
+        try:
+            with open(output_path, 'wb') as output_file:
+                merger.write(output_file)
+            messagebox.showinfo("Success", f"Files merged successfully to {output_path}")
+        except:
+            messagebox.showerror("Error", "Error saving merged file.")
+
+entries = []
+
 
 # Alkalmazás létrehozása
 app = TkinterDnD.Tk()
