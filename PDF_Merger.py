@@ -25,23 +25,30 @@ def display_merger():
     for widget in merger_frame.winfo_children():
         widget.destroy()
 
+    full_filepaths = []
+
     def drop_on_entry(event, entry):
         filepath = event.data
+        filename = os.path.basename(filepath)
+        index = entries.index(entry)  # az aktuális Entry indexe a listában
+        if index < len(full_filepaths):  # ha már létezik elérési út ezen az indexen
+            full_filepaths[index] = filepath  # frissítsük a listában
+        else:
+            full_filepaths.append(filepath)  # egyébként adjuk hozzá az új elérési utat a listához
         entry.delete(0, tk.END)
-        entry.insert(0, filepath)
+        entry.insert(0, filename)
 
     def merge_files():
         merger = PyPDF2.PdfMerger()
 
-        for entry in entries:
-            filepath = entry.get()
+        for index, filepath in enumerate(full_filepaths):  # használjuk a teljes elérési utat a listából
             if filepath.endswith('.pdf'):
                 try:
                     merger.append(filepath)
                 except:
                     feedback_label.config(text=f"Error merging file: {filepath}", fg="red")
                     app.after(3000, lambda: feedback_label.config(text=""))
-                    return  # Kilépünk a függvényből, ha hiba történt
+                    return
 
         # Itt definiáljuk az output_path változót
         output_path = os.path.join(save_location_entry.get(), file_name_entry.get())
