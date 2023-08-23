@@ -19,7 +19,7 @@ save_location_entry = None
 file_name_entry = None
 
 def display_merger():
-    global entries
+    global entries, feedback_label
     global save_location_entry, file_name_entry
     # Törli a merger_frame aktuális tartalmát
     for widget in merger_frame.winfo_children():
@@ -39,22 +39,23 @@ def display_merger():
                 try:
                     merger.append(filepath)
                 except:
-                    messagebox.showerror("Error", f"Error merging file: {filepath}")
-
-        # Ellenőrizzük, hogy a fájlnév végződik-e .pdf-re
-        merged_file_name = file_name_entry.get()
-        if not merged_file_name.lower().endswith('.pdf'):
-            merged_file_name += '.pdf'
+                    feedback_label.config(text=f"Error merging file: {filepath}", fg="red")
+                    app.after(3000, lambda: feedback_label.config(text=""))
+                    return  # Kilépünk a függvényből, ha hiba történt
 
         # Itt definiáljuk az output_path változót
-        output_path = os.path.join(save_location_entry.get(), merged_file_name)
+        output_path = os.path.join(save_location_entry.get(), file_name_entry.get())
+        if not output_path.endswith('.pdf'):
+            output_path += '.pdf'
 
         try:
             with open(output_path, 'wb') as output_file:
                 merger.write(output_file)
-            messagebox.showinfo("Success", f"Files merged successfully to {output_path}")
+            feedback_label.config(text="Files merged successfully!")
+            app.after(3000, lambda: feedback_label.config(text=""))
         except:
-            messagebox.showerror("Error", "Error saving merged file.")
+            feedback_label.config(text="Error saving merged file.", fg="red")
+            app.after(3000, lambda: feedback_label.config(text=""))
 
     entries = []
     for i in range(3):
@@ -68,7 +69,17 @@ def display_merger():
             entries.append(entry)
 
     merge_btn = tk.Button(merger_frame, text="Merge PDFs", command=merge_files, width=20, height=2)
-    merge_btn.grid(row=3, column=0, columnspan=3, pady=20)
+    merge_btn.grid(row=3, column=1, pady=20)
+
+    feedback_label = tk.Label(merger_frame, text="", fg="green")
+    feedback_label.grid(row=4, column=0, columnspan=3, pady=5)
+
+    def reset_entries():
+        for entry in entries:
+            entry.delete(0, tk.END)
+
+    reset_btn = tk.Button(merger_frame, text="Reset", command=reset_entries, width=20, height=2)
+    reset_btn.grid(row=3, column=2, pady=20)
 
 DATA_FILE = "settings_data.pkl"
 
