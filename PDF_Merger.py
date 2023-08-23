@@ -84,6 +84,7 @@ def display_merger():
     def reset_entries():
         for entry in entries:
             entry.delete(0, tk.END)
+        full_filepaths.clear()
 
     reset_btn = tk.Button(merger_frame, text="Reset", command=reset_entries, width=20, height=2)
     reset_btn.grid(row=3, column=2, pady=20)
@@ -181,7 +182,7 @@ app.title("PDF Merger")
 
 # Ablak méretének beállítása
 width = 695
-height = 500
+height = 450
 app.geometry(f"{width}x{height}")
 app.resizable(False, False)
 
@@ -193,16 +194,22 @@ y = (screen_height / 2) - (height / 2)
 app.geometry(f"{width}x{height}+{int(x)}+{int(y)}")
 
 # Settings Frame létrehozása
-settings_frame = tk.Frame(app, bg="lightgray", bd=2, relief="groove")
+settings_frame = tk.Frame(app, bg="#53e2e5", bd=2, relief="groove")
 settings_frame.grid(row=0, column=0, sticky='nsew', padx=10, pady=10)
 
 # Merger Frame létrehozása
-merger_frame = tk.Frame(app, bg="white", bd=2, relief="groove")
+merger_frame = tk.Frame(app, bg="#4d92e2", bd=2, relief="groove")
 merger_frame.grid(row=1, column=0, sticky='nsew', padx=10, pady=10)
 
 # A grid súlyozásának beállítása, hogy a merger_frame és settings_frame kitöltse a rendelkezésre álló teret
 app.grid_rowconfigure(0, weight=1)
 app.grid_rowconfigure(1, weight=3)
+
+# App beállítás
+app.configure(bg='#181c26')
+current_directory = os.path.dirname(os.path.realpath(__file__))
+icon_path = os.path.join(current_directory, 'Logo.ico')
+app.iconbitmap(icon_path)
 
 # Add drag-and-drop functionality to merger_frame
 merger_frame.drop_target_register(DND_FILES)
