@@ -81,6 +81,22 @@ def display_merger():
     feedback_label = tk.Label(merger_frame, text="", fg="green")
     feedback_label.grid(row=4, column=0, columnspan=3, pady=5)
 
+    filepaths = {}
+
+    def drop_on_frame(event):
+        filepath = event.data
+        filename = os.path.basename(filepath)
+        for entry in entries:
+            if not entry.get():
+                entry.delete(0, tk.END)
+                entry.insert(0, filename)
+                filepaths[filename] = filepath  # Elmentjük az elérési utat a szótárba
+                full_filepaths.append(filepath)  # Elmentjük az elérési utat a listában is
+                break
+
+    merger_frame.drop_target_register(DND_FILES)
+    merger_frame.dnd_bind('<<Drop>>', drop_on_frame)
+
     def reset_entries():
         for entry in entries:
             entry.delete(0, tk.END)
