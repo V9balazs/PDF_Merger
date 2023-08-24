@@ -167,28 +167,6 @@ def display_settings():
     save_filename_entry_var.trace_add("write", auto_save)
     save_dir_entry_var.trace_add("write", auto_save)
 
-    # Itt ágyazzuk be a merge_files függvényt
-    def merge_files():
-        merger = PyPDF2.PdfMerger()
-
-        for entry in entries:
-            filepath = entry.get()
-            if filepath.endswith('.pdf'):
-                try:
-                    merger.append(filepath)
-                except:
-                    messagebox.showerror("Error", f"Error merging file: {filepath}")
-
-        # Itt definiáljuk az output_path változót
-        output_path = os.path.join(save_location_entry.get(), file_name_entry.get())
-
-        try:
-            with open(output_path, 'wb') as output_file:
-                merger.write(output_file)
-            messagebox.showinfo("Success", f"Files merged successfully to {output_path}")
-        except:
-            messagebox.showerror("Error", "Error saving merged file.")
-
 entries = []
 
 
